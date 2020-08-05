@@ -1,0 +1,115 @@
+Endpoint Security, CrowdStrike, Manual Installation and Uninstallation
+
+How to install and uninstall CrowdStrike manually
+
+    Getting the Installer
+    Manual Installation on Windows
+    Manual Uninstallation on Windows
+    Manual Installation on macOS
+    Manual Uninstallation on macOS
+    Manual Installation on Linux
+    Manual Uninstallation on Linux
+
+Getting the Installer
+  The installers can be found on the Sensors Download page in the CrowdStrike cloud console: https://falcon.crowdstrike.com/hosts/sensor-downloads. 
+
+
+Windows Installation
+To install CrowdStrike manually on a Windows computer, follow these steps:
+
+    Download the WindowsSensor.exe file to the computer.
+    Open an administrative command prompt and run the following command, replacing "<your CID>" with your unit's unique CCID:
+    WindowsSensor.exe /install /quiet /norestart CID=<your CID>
+    The installer will install the sensor and then connect to the CrowdStrike Cloud before registering the app with the CrowdStrike cloud console.
+
+Please note that CrowdStrike may encounter conflicts with Windows Defender that is managed by Group Policy. It is recommended to check your GPOs prior to installing CrowdStrike.
+Windows Server OS
+
+The Falcon Sensor for Windows will register as antivirus software with the Windows Security Center (WSC) and also disable Windows Defender on Windows workstations. Since Windows servers do not have the WSC, they function differently with regard to Windows Defender:
+
+    Server 2012, 2012 R2: Defender is either disabled (or not even installed) by default–if you previously installed or enabled it manually, then you must disable it manually after installing CrowdStrike.
+    Server 2016 and Server 2019: Defender is enabled by default –if you left it enabled in your configuration, then it must be disabled. The following Powershell command can be used to disable Defender:
+        Set-MpPreference -DisableRealtimeMonitoring $true
+
+Optional Parameters
+
+The ProvWaitTime parameter can be used to extend the time an endpoint attempts to reach the CrowdStrike cloud during sensor installation. Hosts must remain connected to the CrowdStrike cloud throughout installation, which is generally 10 minutes. A host unable to reach and retain a connection to the cloud within 10 minutes will not successfully install the sensor. If your host requires more time to connect, you can override this by using the ProvWaitTime parameter in the command line to increase the timeout to 1 hour.
+Example:WindowsSensor.exe /install /norestart CID=<your CID> ProvWaitTime=3600000
+Windows Uninstallation
+CrowdStrike allows for IT Pros to protect the CrowdStrike sensor installation from uninstall by requiring a maintenance token to be provided prior to uninstalling the sensor. If uninstall protection is enabled, you will be required to provide this token during uninstallation.
+
+Obtaining the Maintenance Token
+
+    In the CrowdStrike cloud console, locate the endpoint on the Host Management screen and select it to view additional details for the host.
+    Click the Reveal maintenance token button
+    Provide your reason for using the token and click the Reveal Token button. Take note of the provided maintenance token.
+
+Option 1: Remove via Windows Control Panel
+
+    Open the Control Panel
+    Click Uninstall a Program
+    Choose CrowdStrike Windows Sensor and uninstall it, providing the maintenance token via the installer if necessary
+
+
+Option 2: Remove via Command Line
+
+    Download CSUninstallTool from the Tool Downloads page in the CrowdStrike cloud console: https://falcon.crowdstrike.com/support/tool-downloads
+    Open an administrative Command Prompt window and run one of the following commands (depending on whether uninstall protection is enabled), replacing "your token" with the endpoint's maintenance token:
+    CsUninstallTool.exe /quiet
+    CsUninstallTool.exe MAINTENANCE_TOKEN=<your token> /quiet
+
+macOS Installation
+To install CrowdStrike manually on a macOS computer, follow these steps:
+
+    Download the FalconSensorMacOS.pkg file to the computer.
+    Either double-click the installer file and proceed to install the CrowdStrike sensor via the GUI, or run the following command in a Terminal window:
+    sudo installer -verboseR -package /path/to/FalconSensorMacOS.pkg -target /
+    Once the CrowdStrike sensor is installed, open a Terminal window and run the following command to license the sensor, replacing "<your CID>" with your unit's unique CCID:
+    sudo /Library/CS/falconctl license <your CID>
+    The installer will install the sensor and then connect to the CrowdStrike Cloud before registering the app with the CrowdStrike cloud console.
+
+Important: on macOS 10.15, you will need to grant full disk access in order for CrowdStrike to function properly. See our KB article for instructions.
+
+Note that on macOS 10.13.4 and above, you will need to enable a kernel extension in order for CrowdStrike to function. Read more about user-approved kernel extension loading.
+
+macOS Uninstallation
+CrowdStrike allows for IT Pros to protect the CrowdStrike sensor from uninstallation by requiring a maintenance token prior to uninstalling the sensor. The steps to uninstall the CrowdStrike sensor differ depending on whether uninstall protection is enabled.
+
+To uninstall CrowdStrike manually on a macOS computer with install protection enabled, follow these steps:
+
+    In the CrowdStrike cloud console, locate the endpoint on the Host Management screen and select it to view additional details for the host.
+    Click the Reveal maintenance token button
+    Provide your reason for using the token and click the Reveal Token button. Take note of the provided maintenance token.
+    Open a Terminal window and run the following command:
+    sudo /Library/CS/falconctl uninstall --maintenance-token
+    Enter the endpoint's maintenance token when prompted
+    The sensor will uninstall itself
+
+To uninstall CrowdStrike manually on a macOS computer with install protection disabled, follow these steps:
+
+    Open a Terminal window and run the following command:
+    sudo /Library/CS/falconctl uninstall
+    The sensor will uninstall itself
+
+IT Pros can remove the endpoint from the CrowdStrike cloud console via the Host Management screen or the endpoint will be automatically removed from the CrowdStrike cloud console after 45 days of inactivity.
+Linux Installation
+To install CrowdStrike manually on a Linux system, follow these steps:
+
+    Download the appropriate CrowdStrike installer for your computer's Linux distribution.
+    Run one of the following commands based upon your Linux distribution:
+        Ubuntu: sudo dpkg -i /path/to/installer_package.deb
+        RHEL, CentOS, Amazon Linux: sudo yum install /path/to/installer_package.rpm
+        SLES: sudo zypper install /path/to/installer_package.rpm
+    Once the CrowdStrike sensor is installed, run the following command to license the sensor (the command is the same for all Linux distributions), replacing "<your CID>" with your unit's unique CCID:
+    sudo /opt/CrowdStrike/falconctl -s --cid=<your CID>
+    Run one of the following commands to start the sensor manually:
+        Hosts with Systemd: systemctl start falcon-sensor
+        Hosts with SysVinit: service falcon-sensor start
+
+Linux Uninstallation
+To uninstall CrowdStrike manually on a Linux system, run one of the following commands based upon your Linux distribution:
+
+    Ubuntu: sudo apt-get purge falcon-sensor
+    RHEL, CentOS, Amazon Linux: sudo yum remove falcon-sensor
+    SLES: sudo zypper remove falcon-sensor
+
